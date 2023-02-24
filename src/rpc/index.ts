@@ -1,6 +1,8 @@
 import axios, { AxiosInstance } from 'axios'
 import {
+  AskForStorageResponse,
   GasEstimationResponse,
+  GetMinerInfoResponse,
   GetNonceResponse,
   MpoolPushOk,
   MpoolPushResponse,
@@ -60,8 +62,8 @@ export class RPC {
 
     try {
       const response = await this.fetcher.post('', {
-        jsonrpc: '2.0',
-        method: 'Filecoin.MpoolGetNonce',
+        jsonrpc: RpcVersion,
+        method: MpoolGetNonce,
         id: 1,
         params: [address.toString()],
       })
@@ -84,8 +86,8 @@ export class RPC {
 
     try {
       const mpoolResponse = await this.fetcher.post<MpoolPushResponse>('', {
-        jsonrpc: '2.0',
-        method: 'Filecoin.MpoolPush',
+        jsonrpc: RpcVersion,
+        method: MpoolPush,
         id: 1,
         params: [{ Message: tx.toJSON(), Signature: signature.toJSON() }],
       })
@@ -192,6 +194,51 @@ export class RPC {
    * @param e - unknown error type
    * @returns a specific formatted error
    */
+  async listMiners(): Promise<ListMinersResponse> {
+    try {
+      const response = await this.fetcher.post('', {
+        jsonrpc: RpcVersion,
+        method: StateListMiners,
+        id: 1,
+        params: [null],
+      })
+
+      return response.data as ListMinersResponse
+    } catch (e: unknown) {
+      return this.handleError<RpcError>(e)
+    }
+  }
+
+  async getMinerInfo(minerAddr: string): Promise<GetMinerInfoResponse> {
+    try {
+      const response = await this.fetcher.post('', {
+        jsonrpc: RpcVersion,
+        method: StateMinerInfo,
+        id: 1,
+        params: [minerAddr, null],
+      })
+
+      return response.data as GetMinerInfoResponse
+    } catch (e: unknown) {
+      return this.handleError<RpcError>(e)
+    }
+  }
+
+  async askForStorage(minerAddr: string, peerId: string): Promise<AskForStorageResponse> {
+    try {
+      const response = await this.fetcher.post('', {
+        jsonrpc: RpcVersion,
+        method: ClientQueryAsk,
+        id: 1,
+        params: [peerId, minerAddr],
+      })
+
+      return response.data as AskForStorageResponse
+    } catch (e: unknown) {
+      return this.handleError<RpcError>(e)
+    }
+  }
+
   private handleError<T>(e: unknown): T {
     if (axios.isAxiosError(e)) {
       if (e.response) {

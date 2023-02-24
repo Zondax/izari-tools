@@ -88,6 +88,53 @@ describe('Filecoin RPC', () => {
     if ('result' in response) expect(response.result).not.toBe('0')
   })
 
+  test('List miners', async () => {
+    const rpcNode = new RPC({ url: nodeUrl, token: nodeToken })
+    const response = await rpcNode.listMiners()
+
+    expect('error' in response).toBe(false)
+    expect('result' in response).toBe(true)
+    if ('result' in response) {
+      expect(typeof response.result).toBe('object')
+      expect(response.result.length).toBeGreaterThan(0)
+    }
+  })
+
+  test('Get miner info', async () => {
+    const rpcNode = new RPC({ url: nodeUrl, token: nodeToken })
+    const response = await rpcNode.getMinerInfo('t01000')
+
+    expect('error' in response).toBe(false)
+    expect('result' in response).toBe(true)
+    if ('result' in response) {
+      const { Owner, Worker, ControlAddresses, PeerId } = response.result
+      expect(PeerId).toBe('12D3KooWGJUwebTPdqHzWHGULsQjQ7kC8XX4TEUx4vsmRP5GDTXm')
+      expect(Owner).toBe('t0100')
+      expect(Worker).toBe('t0100')
+      expect(ControlAddresses).toBe(null)
+    }
+  })
+
+  test('Ask for storage to a miner', async () => {
+    const rpcNode = new RPC({ url: nodeUrl, token: nodeToken })
+    const response = await rpcNode.askForStorage('t01000', '12D3KooWGJUwebTPdqHzWHGULsQjQ7kC8XX4TEUx4vsmRP5GDTXm')
+
+    expect('error' in response).toBe(false)
+    expect('result' in response).toBe(true)
+    if ('result' in response) {
+      const { Response, DealProtocols } = response.result
+      const { Miner, Price, VerifiedPrice, MaxPieceSize, MinPieceSize } = Response
+
+      expect(Miner).toBe('t01000')
+      expect(Price).toBe('500000000')
+      expect(VerifiedPrice).toBe('50000000')
+      expect(MinPieceSize).toBe(256)
+      expect(MaxPieceSize).toBe(536870912)
+
+      expect(DealProtocols.length).toBeGreaterThan(0)
+    }
+  })
+
   test('Broadcast new transaction', () => {
     // TODO
     // Need to sign a message first in order to test this
