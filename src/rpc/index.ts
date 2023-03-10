@@ -3,7 +3,7 @@ import {
   AskForStorageResponse,
   GasEstimationResponse,
   GetMinerInfoResponse,
-  GetNonceResponse,
+  GetNonceResponse, ListMinersResponse,
   MpoolPushOk,
   MpoolPushResponse,
   ReadStateResponse,
@@ -15,6 +15,7 @@ import { Network } from '../artifacts/index.js'
 import { Address } from '../address/index.js'
 import { Transaction } from '../transaction/index.js'
 import { Signature } from '../wallet/index.js'
+import {ClientQueryAsk, MpoolGetNonce, MpoolPush, RpcVersion, StateListMiners, StateMinerInfo} from "./constants";
 
 type Args = { url: string; token: string }
 
