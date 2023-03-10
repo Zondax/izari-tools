@@ -6,24 +6,42 @@ export type SignedTransactionJSON = {
     Signature: SignatureJSON
 }
 
+/**
+ * Generic rpc error that can be received on any rpc call
+ */
 export type RpcError = {
     error: {
         message: string
     }
 }
 
+/**
+ * Nonce or error
+ * For more information about MpoolGetNonce, please refer to this {@link https://lotus.filecoin.io/reference/lotus/mpool/#mpoolgetnonce|link}
+ */
 export type GetNonceResponse =
     | {
-    result: number
-}
+        result: number
+    }
     | RpcError
 
+
+/**
+ * Gas estimation result or error
+ * For more information about how gas fees work, please refer to this {@link https://spec.filecoin.io/systems/filecoin_vm/gas_fee/#section-systems.filecoin_vm.gas_fee|link}
+ * For more information about gas fees, please refer to this {@link https://lotus.filecoin.io/reference/lotus/gas/#gasestimatemessagegas|link}
+ */
 export type GasEstimationResponse =
     | {
-    result: { GasFeeCap: string; GasPremium: string; GasLimit: number }
-}
+        result: { GasFeeCap: string; GasPremium: string; GasLimit: number }
+    }
     | RpcError
 
+
+/**
+ * StateWaitMsg result or error
+ * For more information about waitMsgState, please refer to this {@link https://lotus.filecoin.io/reference/lotus/state/#statewaitmsg|link}
+ */
 export type StateWaitMsgResponse =
     | {
     result: {
@@ -36,18 +54,37 @@ export type StateWaitMsgResponse =
 }
     | RpcError
 
+/**
+ * MpoolPush successful response
+ */
 export type MpoolPushOk = {
     result: {
         ['/']: string
     }
 }
+
+/**
+ * Mempool push result or error
+ * For more information about MpoolPush, please refer to this {@link https://lotus.filecoin.io/reference/lotus/mpool/#mpoolpush|link}
+ */
 export type MpoolPushResponse = MpoolPushOk | RpcError
 
+/**
+ * Actor’s state or error
+ * For more information about read state, please refer to this {@link https://lotus.filecoin.io/reference/lotus/state/#statereadstate|link}
+ */
 export type ReadStateResponse = { Balance: string; Code: { '/': string } } | RpcError
 
+
+/**
+ * Balance of the given address at the current head of the chain or error
+ * For more information about walletBalance, please refer to this {@link https://lotus.filecoin.io/reference/lotus/wallet/#walletbalance|link}
+ */
 export type WalletBalanceResponse = { result: string } | RpcError
 
-
+/**
+ * List of miners or rpc error
+ */
 export type ListMinersResponse =
     | {
     result: string[]
@@ -55,6 +92,10 @@ export type ListMinersResponse =
     | RpcError
 
 export type BeneficiaryTerm = { Quota: string; UsedQuota: string; Expiration: number }
+
+/**
+ * Miner information or rpc error
+ */
 export type GetMinerInfoResponse =
     | {
     result: {
@@ -76,6 +117,9 @@ export type GetMinerInfoResponse =
 }
     | RpcError
 
+/**
+ * Storage conditions for a particular miner, or error
+ */
 export type AskForStorageResponse =
     | {
     result: {

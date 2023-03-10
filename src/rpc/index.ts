@@ -25,6 +25,9 @@ import {
   WalletBalance
 } from "./constants.js";
 
+/**
+ * Parameters to create a new RPC connection
+ */
 type Args = { url: string; token: string }
 
 /**
@@ -177,7 +180,7 @@ export class RPC {
 
   /**
    * Returns the balance of the given address at the current head of the chain.
-   * For more information about waitMsgState, please refer to this {@link https://lotus.filecoin.io/reference/lotus/wallet/#walletbalance|link}
+   * For more information about walletBalance, please refer to this {@link https://lotus.filecoin.io/reference/lotus/wallet/#walletbalance|link}
    * @param address - address to fetch balance from
    * @returns the actual balance or error
    */
