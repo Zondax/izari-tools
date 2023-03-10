@@ -66,8 +66,8 @@ export class RPC {
    * @param address - address which next nonce to query
    * @returns the next nonce or error
    */
-  async getNonce(address: Address): Promise<GetNonceResponse> {
-    this.validateNetwork(address)
+  async getNonce(address: Address | string): Promise<GetNonceResponse> {
+    address = this.validateNetwork(address)
 
     try {
       const response = await this.fetcher.post('', {
@@ -138,8 +138,8 @@ export class RPC {
    * @param address - address to read state
    * @returns the state or error
    */
-  async readState(address: Address): Promise<ReadStateResponse> {
-    this.validateNetwork(address)
+  async readState(address: Address | string): Promise<ReadStateResponse> {
+    address = this.validateNetwork(address)
 
     try {
       const response = await this.fetcher.post('', {
@@ -182,7 +182,7 @@ export class RPC {
    * @returns the actual balance or error
    */
   async walletBalance(address: Address): Promise<WalletBalanceResponse> {
-    this.validateNetwork(address)
+    address = this.validateNetwork(address)
 
     try {
       const response = await this.fetcher.post('', {
@@ -200,7 +200,6 @@ export class RPC {
   /**
    * Handle errors coming from the fetcher (axios) instance
    * For more information about error handling, please refer to this {@link https://axios-http.com/docs/handling_errors|link}
-   * @param e - unknown error type
    * @returns a specific formatted error
    */
   async listMiners(): Promise<ListMinersResponse> {
@@ -218,7 +217,9 @@ export class RPC {
     }
   }
 
-  async getMinerInfo(minerAddr: string): Promise<GetMinerInfoResponse> {
+  async getMinerInfo(minerAddr: Address | string): Promise<GetMinerInfoResponse> {
+    minerAddr = this.validateNetwork(minerAddr)
+
     try {
       const response = await this.fetcher.post('', {
         jsonrpc: RpcVersion,
@@ -233,7 +234,9 @@ export class RPC {
     }
   }
 
-  async askForStorage(minerAddr: string, peerId: string): Promise<AskForStorageResponse> {
+  async askForStorage(minerAddr: Address | string, peerId: string): Promise<AskForStorageResponse> {
+    minerAddr = this.validateNetwork(minerAddr)
+
     try {
       const response = await this.fetcher.post('', {
         jsonrpc: RpcVersion,
@@ -260,8 +263,11 @@ export class RPC {
     throw e
   }
 
-  private validateNetwork = (address: Address, description = 'address') => {
+  private validateNetwork = (address: Address | string, description = 'address') : Address => {
+    if(typeof address == "string") address = Address.fromString(address)
     if (address.getNetwork() !== this.network) throw new Error(`${description} belongs to ${address.getNetwork()} network while rpc allows ${this.network}`)
+
+    return address
   }
 }
 
