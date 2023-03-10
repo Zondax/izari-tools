@@ -15,7 +15,15 @@ import { Network } from '../artifacts/index.js'
 import { Address } from '../address/index.js'
 import { Transaction } from '../transaction/index.js'
 import { Signature } from '../wallet/index.js'
-import {ClientQueryAsk, MpoolGetNonce, MpoolPush, RpcVersion, StateListMiners, StateMinerInfo} from "./constants";
+import {
+  ClientQueryAsk, GasEstimateMessageGas,
+  MpoolGetNonce,
+  MpoolPush,
+  RpcVersion,
+  StateListMiners,
+  StateMinerInfo, StateReadState, StateWaitMsg,
+  WalletBalance
+} from "./constants.js";
 
 type Args = { url: string; token: string }
 
@@ -86,14 +94,14 @@ export class RPC {
     this.validateNetwork(tx.from, 'sender')
 
     try {
-      const mpoolResponse = await this.fetcher.post<MpoolPushResponse>('', {
+      const mpoolResponse = await this.fetcher.post('', {
         jsonrpc: RpcVersion,
         method: MpoolPush,
         id: 1,
         params: [{ Message: tx.toJSON(), Signature: signature.toJSON() }],
       })
 
-      return mpoolResponse.data
+      return mpoolResponse.data as MpoolPushResponse
     } catch (e: unknown) {
       return this.handleError<RpcError>(e)
     }
@@ -112,8 +120,8 @@ export class RPC {
 
     try {
       const response = await this.fetcher.post('', {
-        jsonrpc: '2.0',
-        method: 'Filecoin.GasEstimateMessageGas',
+        jsonrpc: RpcVersion,
+        method: GasEstimateMessageGas,
         id: 1,
         params: [tx.toJSON(), { MaxFee: '0' }, null],
       })
@@ -135,8 +143,8 @@ export class RPC {
 
     try {
       const response = await this.fetcher.post('', {
-        jsonrpc: '2.0',
-        method: 'Filecoin.StateReadState',
+        jsonrpc: RpcVersion,
+        method: StateReadState,
         id: 1,
         params: [address.toString(), null],
       })
@@ -156,8 +164,8 @@ export class RPC {
   async waitMsgState(cid: MpoolPushOk['result']): Promise<StateWaitMsgResponse> {
     try {
       const response = await this.fetcher.post('', {
-        jsonrpc: '2.0',
-        method: 'Filecoin.StateWaitMsg',
+        jsonrpc: RpcVersion,
+        method: StateWaitMsg,
         id: 1,
         params: [cid, 0, null, false],
       })
@@ -178,8 +186,8 @@ export class RPC {
 
     try {
       const response = await this.fetcher.post('', {
-        jsonrpc: '2.0',
-        method: 'Filecoin.WalletBalance',
+        jsonrpc: RpcVersion,
+        method: WalletBalance,
         id: 1,
         params: [address.toString()],
       })

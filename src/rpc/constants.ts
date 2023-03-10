@@ -7,3 +7,4 @@ export const StateReadState = 'Filecoin.StateReadState'
 export const StateListMiners = 'Filecoin.StateListMiners'
 export const StateMinerInfo = 'Filecoin.StateMinerInfo'
 export const ClientQueryAsk = 'Filecoin.ClientQueryAsk'
+export const WalletBalance = "Filecoin.WalletBalance"
