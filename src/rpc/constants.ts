@@ -1,0 +1,10 @@
+export const RpcVersion = '2.0'
+export const MpoolGetNonce = 'Filecoin.MpoolGetNonce'
+export const MpoolPush = 'Filecoin.MpoolPush'
+export const StateWaitMsg = 'Filecoin.StateWaitMsg'
+export const GasEstimateMessageGas = 'Filecoin.GasEstimateMessageGas'
+export const StateReadState = 'Filecoin.StateReadState'
+export const StateListMiners = 'Filecoin.StateListMiners'
+export const StateMinerInfo = 'Filecoin.StateMinerInfo'
+export const ClientQueryAsk = 'Filecoin.ClientQueryAsk'
+export const WalletBalance = "Filecoin.WalletBalance"

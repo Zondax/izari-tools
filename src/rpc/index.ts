@@ -1,7 +1,9 @@
 import axios, { AxiosInstance } from 'axios'
 import {
+  AskForStorageResponse,
   GasEstimationResponse,
-  GetNonceResponse,
+  GetMinerInfoResponse,
+  GetNonceResponse, ListMinersResponse,
   MpoolPushOk,
   MpoolPushResponse,
   ReadStateResponse,
@@ -13,7 +15,19 @@ import { Network } from '../artifacts/index.js'
 import { Address } from '../address/index.js'
 import { Transaction } from '../transaction/index.js'
 import { Signature } from '../wallet/index.js'
+import {
+  ClientQueryAsk, GasEstimateMessageGas,
+  MpoolGetNonce,
+  MpoolPush,
+  RpcVersion,
+  StateListMiners,
+  StateMinerInfo, StateReadState, StateWaitMsg,
+  WalletBalance
+} from "./constants.js";
 
+/**
+ * Parameters to create a new RPC connection
+ */
 type Args = { url: string; token: string }
 
 /**
@@ -55,13 +69,13 @@ export class RPC {
    * @param address - address which next nonce to query
    * @returns the next nonce or error
    */
-  async getNonce(address: Address): Promise<GetNonceResponse> {
-    this.validateNetwork(address)
+  async getNonce(address: Address | string): Promise<GetNonceResponse> {
+    address = this.validateNetwork(address)
 
     try {
       const response = await this.fetcher.post('', {
-        jsonrpc: '2.0',
-        method: 'Filecoin.MpoolGetNonce',
+        jsonrpc: RpcVersion,
+        method: MpoolGetNonce,
         id: 1,
         params: [address.toString()],
       })
@@ -83,14 +97,14 @@ export class RPC {
     this.validateNetwork(tx.from, 'sender')
 
     try {
-      const mpoolResponse = await this.fetcher.post<MpoolPushResponse>('', {
-        jsonrpc: '2.0',
-        method: 'Filecoin.MpoolPush',
+      const mpoolResponse = await this.fetcher.post('', {
+        jsonrpc: RpcVersion,
+        method: MpoolPush,
         id: 1,
         params: [{ Message: tx.toJSON(), Signature: signature.toJSON() }],
       })
 
-      return mpoolResponse.data
+      return mpoolResponse.data as MpoolPushResponse
     } catch (e: unknown) {
       return this.handleError<RpcError>(e)
     }
@@ -109,8 +123,8 @@ export class RPC {
 
     try {
       const response = await this.fetcher.post('', {
-        jsonrpc: '2.0',
-        method: 'Filecoin.GasEstimateMessageGas',
+        jsonrpc: RpcVersion,
+        method: GasEstimateMessageGas,
         id: 1,
         params: [tx.toJSON(), { MaxFee: '0' }, null],
       })
@@ -127,13 +141,13 @@ export class RPC {
    * @param address - address to read state
    * @returns the state or error
    */
-  async readState(address: Address): Promise<ReadStateResponse> {
-    this.validateNetwork(address)
+  async readState(address: Address | string): Promise<ReadStateResponse> {
+    address = this.validateNetwork(address)
 
     try {
       const response = await this.fetcher.post('', {
-        jsonrpc: '2.0',
-        method: 'Filecoin.StateReadState',
+        jsonrpc: RpcVersion,
+        method: StateReadState,
         id: 1,
         params: [address.toString(), null],
       })
@@ -153,8 +167,8 @@ export class RPC {
   async waitMsgState(cid: MpoolPushOk['result']): Promise<StateWaitMsgResponse> {
     try {
       const response = await this.fetcher.post('', {
-        jsonrpc: '2.0',
-        method: 'Filecoin.StateWaitMsg',
+        jsonrpc: RpcVersion,
+        method: StateWaitMsg,
         id: 1,
         params: [cid, 0, null, false],
       })
@@ -166,17 +180,17 @@ export class RPC {
 
   /**
    * Returns the balance of the given address at the current head of the chain.
-   * For more information about waitMsgState, please refer to this {@link https://lotus.filecoin.io/reference/lotus/wallet/#walletbalance|link}
+   * For more information about walletBalance, please refer to this {@link https://lotus.filecoin.io/reference/lotus/wallet/#walletbalance|link}
    * @param address - address to fetch balance from
    * @returns the actual balance or error
    */
   async walletBalance(address: Address): Promise<WalletBalanceResponse> {
-    this.validateNetwork(address)
+    address = this.validateNetwork(address)
 
     try {
       const response = await this.fetcher.post('', {
-        jsonrpc: '2.0',
-        method: 'Filecoin.WalletBalance',
+        jsonrpc: RpcVersion,
+        method: WalletBalance,
         id: 1,
         params: [address.toString()],
       })
@@ -189,9 +203,57 @@ export class RPC {
   /**
    * Handle errors coming from the fetcher (axios) instance
    * For more information about error handling, please refer to this {@link https://axios-http.com/docs/handling_errors|link}
-   * @param e - unknown error type
    * @returns a specific formatted error
    */
+  async listMiners(): Promise<ListMinersResponse> {
+    try {
+      const response = await this.fetcher.post('', {
+        jsonrpc: RpcVersion,
+        method: StateListMiners,
+        id: 1,
+        params: [null],
+      })
+
+      return response.data as ListMinersResponse
+    } catch (e: unknown) {
+      return this.handleError<RpcError>(e)
+    }
+  }
+
+  async getMinerInfo(minerAddr: Address | string): Promise<GetMinerInfoResponse> {
+    minerAddr = this.validateNetwork(minerAddr)
+
+    try {
+      const response = await this.fetcher.post('', {
+        jsonrpc: RpcVersion,
+        method: StateMinerInfo,
+        id: 1,
+        params: [minerAddr, null],
+      })
+
+      return response.data as GetMinerInfoResponse
+    } catch (e: unknown) {
+      return this.handleError<RpcError>(e)
+    }
+  }
+
+  async askForStorage(minerAddr: Address | string, peerId: string): Promise<AskForStorageResponse> {
+    minerAddr = this.validateNetwork(minerAddr)
+
+    try {
+      const response = await this.fetcher.post('', {
+        jsonrpc: RpcVersion,
+        method: ClientQueryAsk,
+        id: 1,
+        params: [peerId, minerAddr],
+      })
+
+      return response.data as AskForStorageResponse
+    } catch (e: unknown) {
+      return this.handleError<RpcError>(e)
+    }
+  }
+
   private handleError<T>(e: unknown): T {
     if (axios.isAxiosError(e)) {
       if (e.response) {
@@ -204,8 +266,11 @@ export class RPC {
     throw e
   }
 
-  private validateNetwork = (address: Address, description = 'address') => {
+  private validateNetwork = (address: Address | string, description = 'address') : Address => {
+    if(typeof address == "string") address = Address.fromString(address)
     if (address.getNetwork() !== this.network) throw new Error(`${description} belongs to ${address.getNetwork()} network while rpc allows ${this.network}`)
+
+    return address
   }
 }
 
